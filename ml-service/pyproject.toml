@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "ml-service"
+version = "0.1.0"
+description = ""
+authors = ["MulhamShaheen <mulhamshaheen.ms@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"
+fastapi = "^0.115.4"
+uvicorn = "^0.32.0"
+llvmlite = "^0.41.1"
+numba = "^0.58.1"
+pretty-midi = "^0.2.10"
+pydantic = "^2.9.2"
+music21 = "^9.1.0"
+tensorflow = "2.15.0"
+librosa = "^0.10.1"
+basic-pitch = "^0.4.0"
+python-multipart = "^0.0.17"
+aiofiles = "^24.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
