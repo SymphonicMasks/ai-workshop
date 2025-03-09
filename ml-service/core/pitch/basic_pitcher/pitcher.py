@@ -1,4 +1,5 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from typing import Optional
 
 import pretty_midi
 from basic_pitch.inference import predict
@@ -17,9 +18,10 @@ class BasicPitcher(ABC, BasePitcher):
                                                        onset_threshold=0.6,
                                                        minimum_frequency=130.813,
                                                        maximum_frequency=1278.75)
+        return midi_data
 
     @classmethod
-    def save_midi(cls, audio_file_path: str, output_path: str | None) -> str:
+    def save_midi(cls, audio_file_path: str, output_path: Optional[str] = None) -> str:
         if output_path is None:
             output_path = cls.default_path
         midi_data = cls.invoke(audio_file_path)
