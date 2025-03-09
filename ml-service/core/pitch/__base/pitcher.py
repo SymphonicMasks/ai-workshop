@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 
 import pretty_midi
 
@@ -13,7 +14,7 @@ class BasePitcher(ABC):
         pass
 
     @classmethod
-    def save_midi(cls, audio_file_path: str, output_path: str | None) -> str:
+    def save_midi(cls, audio_file_path: str, output_path: Optional[str]) -> str:
         if output_path is None:
             output_path = cls.default_path
         midi_data = cls.invoke(audio_file_path)
