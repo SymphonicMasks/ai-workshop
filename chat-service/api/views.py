@@ -23,8 +23,9 @@ async def get_version() -> VersionModel:
     )
 
 
-@app.post('/chat/{sys_prompt_id}', description='Запрос в LLM с системным промытом sys_prompt_id')
-async def chat(sys_prompt_id: str, query: str) -> Response:
+@app.post('/chat/{sys_prompt_name}', description='Запрос в LLM с системным промытом sys_prompt_id')
+async def chat(sys_prompt_name: str, query: str) -> Response:
     # получить системный промпт из какой-то базы
+    # prompt = get_sys_prompt_by_name(sys_prompt_name)
     answer = 'Hello, world!'
     return Response(content=answer, media_type="application/text")
