@@ -1,0 +1,11 @@
+services:
+  fastapi-service:
+    build: .
+    container_name: ml-service
+    ports:
+      - "127.0.0.1:8080:8080"
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./logs:/app/logs
