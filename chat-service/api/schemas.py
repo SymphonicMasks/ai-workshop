@@ -2,7 +2,7 @@ from pydantic import (
     BaseModel,
     Field,
 )
-from typing import List, Tuple
+from typing import List, Literal
 
 
 class VersionModel(BaseModel):
@@ -28,9 +28,16 @@ class StructuredFeedback(BaseModel):
     )
 
 
+class NoteResult(BaseModel):
+    original_note: str
+    played_note: str
+    status: Literal["correct", "wrong", "skipped", "duration+", "duration-"]
+    original_duration: str
+    played_duration: str
+    tact_number: int
+    start_time: float
+    end_time: float
+
+
 class FeedbackRequest(BaseModel):
-    """Входные данные для анализа игры"""
-    result: List[Tuple[str | None, str | None, str]] = Field(
-        ...,
-        description='Список кортежей (ожидаемая_нота, сыгранная_нота, тип_ошибки)'
-    )
+    result: List[NoteResult]
