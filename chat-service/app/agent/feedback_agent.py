@@ -3,8 +3,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from typing import List, Tuple
 
-
-# from app.utils.prompts import FEEDBACK_PROMPT
+from api.schemas import FeedbackRequest
+from app.utils.prompts import FEEDBACK_PROMPT
 
 class MusicFeedbackAgent:
     def __init__(self, llm):
@@ -12,23 +12,7 @@ class MusicFeedbackAgent:
         self.chain = self._create_chain()
 
     def _create_chain(self):
-        prompt_template = ChatPromptTemplate.from_template(
-            """Ты - добрый и поддерживающий музыкальный преподаватель-робот. Дай фидбек ребенку по игре на инструменте.
-
-            Статистика выполнения:
-            Общее количество нот: {total_notes}
-            Правильно сыгранных нот: {correct} ({accuracy}%)
-            Ошибок: {wrong}
-            Пропущенных нот: {skipped}
-
-            Детали ошибок:
-            {error_details}
-
-            Начни с позитивной поддержки, затем дай конкретные советы по улучшению. 
-            Используй простой язык, понятный ребенку. Избегай технических терминов.
-            Сосредоточься на 2-3 самых важных улучшениях."""
-        )
-
+        prompt_template = ChatPromptTemplate.from_template(FEEDBACK_PROMPT)
         return (
                 RunnablePassthrough.assign(
                     accuracy=lambda x: round((x["correct"] / x["total_notes"]) * 100),
@@ -39,8 +23,9 @@ class MusicFeedbackAgent:
                 | StrOutputParser()
         )
 
-    def _format_error_details(self, results: List[Tuple]) -> str:
+    def _format_error_details(self, results: FeedbackRequest) -> str:
         details = []
+        results = results.result
         for i, (original, played, status) in enumerate(results, 1):
             if status == 'wrong':
                 details.append(f"Такт {i}: Должна быть {original}, прозвучала {played}")
@@ -48,19 +33,20 @@ class MusicFeedbackAgent:
                 details.append(f"Такт {i}: Пропущена нота {original}")
         return "\n".join(details) if details else "Ошибок немного, это отличный результат!"
 
-    def _calculate_stats(self, results):
+    def _calculate_stats(self, results: FeedbackRequest):
+        results = results.result
         total = len(results)
         correct = sum(1 for _, _, status in results if status == 'correct')
         wrong = sum(1 for _, _, status in results if status == 'wrong')
         skipped = sum(1 for _, _, status in results if status == 'skipped')
         return total, correct, wrong, skipped
 
-    def generate_feedback(self, results: List[Tuple]) -> str:
+    def generate_feedback(self, results: FeedbackRequest) -> str:
         if not results:
             return "Пока не собрано данных для анализа. Продолжай практиковаться!"
 
         total, correct, wrong, skipped = self._calculate_stats(results)
-
+        print(total, correct, wrong, skipped)
         return self.chain.invoke({
             "results": results,
             "total_notes": total,

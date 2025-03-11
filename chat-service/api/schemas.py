@@ -10,4 +10,4 @@ class VersionModel(BaseModel):
     version: str = Field(default=None, title='Версия', description='Номер версии в виде X.Y[.Z]')
 
 class FeedbackRequest(BaseModel):
-    result: List[Tuple[str, str, str]]
+    result: List[Tuple[str | None, str | None, str]]
