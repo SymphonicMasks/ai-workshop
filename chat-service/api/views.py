@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.responses import Response
 
 from api.schemas import VersionModel, FeedbackRequest
+from app.utils.model import get_model
+from app.agent.feedback_agent import MusicFeedbackAgent
 
 app = FastAPI(
     title='Chat Service',
@@ -32,5 +34,10 @@ async def chat(sys_prompt_name: str, query: str) -> Response:
 
 @app.post('/feedback')
 async def feedback(result: FeedbackRequest) -> Response:
-    answer = 'ok'
-    return Response(content=answer, media_type="applilcation/text")
+    model = get_model(model_name = "gpt-4o-mini")
+    agent = MusicFeedbackAgent(model)
+
+    # Генерация фидбека
+    feedback = agent.generate_feedback(result)
+
+    return Response(content=feedback, media_type="applilcation/text")
