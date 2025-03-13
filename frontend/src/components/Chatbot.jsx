@@ -25,6 +25,7 @@ function Chatbot() {
     //   }, 1000)
     // })
 
+    fetch('http://127.0.0.1:8081/version').then(data => data.text()).then(console.log);
     fetch('violin.xml').then(data => data.text()).then((data)=>{
 
       setTimeout(()=>{
