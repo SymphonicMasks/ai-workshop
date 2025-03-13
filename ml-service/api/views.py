@@ -114,18 +114,12 @@ async def make_feedback(
         midi_data = pitcher.save_midi(str(processed_path), str(midi_path))
         
         # Формируем данные для chat-service
-        chat_data = {
-            "instrument": instrument,
-            "key": key,
-            "time_signature": time_signature,
-            "midi_path": str(midi_path),
-            "original_score_path": f"data/scores/{instrument}/{key}.xml"  # Предполагаем такую структуру
-        }
+        chat_data = SubmissionProcessor()
         
         # Отправляем запрос в chat-service
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{CHAT_SERVICE_URL}/analyze",
+                f"{CHAT_SERVICE_URL}/feedback",
                 json=chat_data
             ) as response:
                 if response.status != 200:

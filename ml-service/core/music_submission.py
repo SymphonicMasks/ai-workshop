@@ -200,11 +200,15 @@ class SubmissionProcessor:
         linked_notes.reverse()
 
         for i, res in enumerate(linked_notes):
-            correct_note, user_note, status = res
+            correct_note, user_note_obj, status = res
+            original_duration = fractions[i] if correct_note is not None else None
+            played_duration = (user_note_obj.end - user_note_obj.start) / one_time if user_note_obj else None
+            tact_number = int(user_note_obj.start / one_time) if user_note_obj else None
+
             if status == "correct":
                 stream_error.notes[stream_pointer].style.color = "green"
             elif status == "wrong":
-                wrong_note = Note(user_note, quarterLength=fractions[i])
+                wrong_note = Note(user_note_obj, quarterLength=fractions[i])
                 wrong_note.style.color = "red"
 
                 orig_note_obj = stream_error.notes[stream_pointer]
@@ -214,18 +218,30 @@ class SubmissionProcessor:
                 chord_element = chord.Chord([orig_note_obj, wrong_note])
                 stream_error.replace(orig_note_obj, chord_element)
             else:
-                print("status: ", status)
-                print("correct_note: ", correct_note)
-                print("user_note: ", user_note)
-
                 stream_error.notes[stream_pointer].style.color = "red"
 
             if stream_error.notes[stream_pointer].tie == tie.Tie("start"):
                 stream_pointer += 1
-
             stream_pointer += 1
             if stream_pointer >= len(stream_error.notes):
                 break
+        
+        if played_duration and original_duration:
+            if played_duration > original_duration * 1.2:
+                status = "duration+"
+            elif played_duration < original_duration * 0.8:
+                status = "duration-"
+
+        results.append({
+            "original_note": pretty_midi.note_number_to_name(correct_note) if correct_note else None,
+            "played_note": pretty_midi.note_number_to_name(user_note_obj.pitch) if user_note_obj else None,
+            "status": status,
+            "original_duration": str(original_duration) if original_duration else "None",
+            "played_duration": str(played_duration) if played_duration else "None",
+            "tact_number": tact_number,
+            "start_time": round(user_note_obj.start, 3) if user_note_obj else None,
+            "end_time": round(user_note_obj.end, 3) if user_note_obj else None
+        })
 
         # Apply key signature if available
         if self.key is not None:
