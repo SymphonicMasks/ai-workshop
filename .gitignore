@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 /shelf/
 /workspace.xml
 .idea
@@ -6,3 +7,12 @@
 __pycache__
 .vscode/
 ml-service/logs
+=======
+.idea
+.vscode/
+.venv/
+venv/
+
+#logs
+ml-service/logs
+>>>>>>> Stashed changes

@@ -1,10 +1,20 @@
 import time
 from fastapi import FastAPI, UploadFile, File, Request, Response
 from fastapi.responses import FileResponse
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+from schemas import VersionModel
+=======
+>>>>>>> Stashed changes
 from api.schemas import VersionModel
 from api.logger import setup_logger
 
 logger = None
+<<<<<<< Updated upstream
+=======
+>>>>>>> 26ddffe0bf5a14d1c0c30bb263a52933e4681cf6
+>>>>>>> Stashed changes
 
 app = FastAPI(
     title='ML Service',

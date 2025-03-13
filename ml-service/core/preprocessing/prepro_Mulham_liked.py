@@ -17,7 +17,11 @@ class AudioProcessor:
 
     def remove_noise(self):
         # Применяем шумоподавление
+<<<<<<< HEAD
+        self.y = nr.reduce_noise(y=self.y, sr=self.sr, prop_decrease=0.5)
+=======
         self.y = nr.reduce_noise(y=self.y, sr=self.sr, prop_decrease=0.9)
+>>>>>>> 26ddffe0bf5a14d1c0c30bb263a52933e4681cf6
 
     def normalize_audio(self):
         # Нормализация громкости (восстанавливаем уровень)
@@ -25,6 +29,8 @@ class AudioProcessor:
         if peak > 0:
             self.y = self.y / peak  # Масштабируем к диапазону [-1, 1]
 
+<<<<<<< HEAD
+=======
     def apply_bandpass_filter(self):
         # Анализируем спектр сигнала для определения частотных границ
         D = librosa.amplitude_to_db(np.abs(librosa.stft(self.y)), ref=np.max)
@@ -46,15 +52,28 @@ class AudioProcessor:
         b, a = signal.butter(6, [low, high], btype="band")
         self.y = signal.lfilter(b, a, self.y)
 
+>>>>>>> 26ddffe0bf5a14d1c0c30bb263a52933e4681cf6
     def save_audio(self, output_file="cleaned_audio_2_vers.wav"):
         sf.write(output_file, self.y, self.sr)
 
     def process(self, output_file="good_cleaned_audio_2_vers.wav"):
         self.load_audio()
+<<<<<<< HEAD
+=======
         self.apply_bandpass_filter()
+>>>>>>> 26ddffe0bf5a14d1c0c30bb263a52933e4681cf6
         self.remove_noise()  # Удаляем шумы
         self.normalize_audio()  # Восстанавливаем громкость
         self.save_audio(output_file)
 
+<<<<<<< HEAD
+processor = AudioProcessor("audio.wav")
+processor.process()
+#SNNoise 
+
+
+#++Частота 16-1950
+=======
 processor = AudioProcessor("good_playing.mp3")
 processor.process()
+>>>>>>> 26ddffe0bf5a14d1c0c30bb263a52933e4681cf6
