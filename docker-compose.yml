@@ -1,39 +1,38 @@
 services:
-  chat-service:
-    build: ./chat-service
-    container_name: chat-service
+#  chat-service:
+#    build: ./chat-service
+#    container_name: chat-service
+#    ports:
+#      - "8081:8081"
+#    restart: unless-stopped
+#    environment:
+#      - TZ=UTC
+#    volumes:
+#      - ./chat-service/logs:/app/logs
+  ml-service:
+    build: ./ml-service
+    container_name: ml-service
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8080:8080"
     restart: unless-stopped
     environment:
       - TZ=UTC
     volumes:
-      - ./chat-service/logs:/app/logs
-  #
-  #  ml-service:
-  #    build: ./ml-service
-  #    container_name: ml-service
-  #    ports:
-  #      - "127.0.0.1:8080:8080"
-  #    restart: unless-stopped
-  #    environment:
-  #      - TZ=UTC
-  #    volumes:
-  #      - ./ml-service/logs:/app/logs
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: frontend
-    restart: always
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - VITE_APP_BACKEND_ADDRESS=http://localhost/api
-    networks:
-      - network
-networks:
- network:
+      - ./ml-service/logs:/app/logs
+#  frontend:
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#    container_name: frontend
+#    restart: always
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - ./frontend:/app
+#      - /app/node_modules
+#    environment:
+#      - VITE_APP_BACKEND_ADDRESS=http://localhost/api
+#    networks:
+#      - network
+#networks:
+# network:
