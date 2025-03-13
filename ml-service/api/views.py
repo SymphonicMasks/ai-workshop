@@ -33,20 +33,21 @@ async def startup_event():
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
-
-    # Убираем чтение тела запроса для логов
-    await logger.info(
-        f"Incoming request: {request.method} {request.url}"
-    )
+    
+    # Логируем только метаданные запроса
+    log_data = {
+        "method": request.method,
+        "url": str(request.url),
+        "headers": dict(request.headers)
+    }
+    await logger.info(f"Request: {log_data}")
 
     response = await call_next(request)
     process_time = time.time() - start_time
 
-    # Убираем чтение тела ответа
+    # Логируем только статус и время выполнения
     await logger.info(
-        f"Request completed: {request.method} {request.url}\n"
-        f"Status: {response.status_code}\n"
-        f"Duration: {process_time:.3f}s"
+        f"Response: {response.status_code} | Duration: {process_time:.3f}s"
     )
 
     return response
@@ -85,6 +86,7 @@ async def make_feedback(
         data_dir = base_dir / "data"
         orig_midi_path = data_dir / "scores" / "base.midi"
         visualization_dir = data_dir / "visuals"
+        visualization_xml_dir = data_dir / "xmls"
 
         # Создаем директории при необходимости
         visualization_dir.mkdir(parents=True, exist_ok=True)
@@ -110,14 +112,22 @@ async def make_feedback(
         # Конвертация в MIDI
         pitcher = BasicPitcher()
         submitted_midi_data = pitcher.save_midi(str(processed_path), str(midi_path))
-        
-        sheet_gen = SheetGenerator(fractions=[0.25, 0.5, 1, 2, 4], pause_fractions=[0.25, 0.5, 1, 2, 4], default_path=Path(visualization_xml_dir))
+        orig_midi_data = pretty_midi.PrettyMIDI(str(orig_midi_path))
+
+        sheet_gen = SheetGenerator(
+            fractions=[0.25, 0.5, 1, 2, 4], 
+            pause_fractions=[0.25, 0.5, 1, 2, 4], 
+            default_path=visualization_xml_dir)
 
         original_stream = sheet_gen.invoke(orig_midi_data)
-        notes, tempo = sheet_gen.get_notes_from_midi(submitted_midi_data)
+        notes, tempo = sheet_gen.get_notes_from_midi(orig_midi_data)
 
-        submitter = SubmissionProcessor(original_stream, notes, tempo, visualization_xml_dir)
+        submitter = SubmissionProcessor(original_stream, notes, tempo, str(visualization_xml_dir))
         compared_data_res = submitter.make_viz_new_algo()
+
+        filename = f"comparison_{timestamp}.xml"
+        viz_path = visualization_dir / filename
+        submitter.stream_error.write('musicxml', fp=str(viz_path))
 
         submit_data = FeedbackRequest({"result": compared_data_res})
 
@@ -139,9 +149,7 @@ async def make_feedback(
         input_path.unlink()
         processed_path.unlink()
         
-        filename = f"comparison_{timestamp}.xml"
-        viz_path = visualization_dir / filename
-        stream_error.write('musicxml', fp=str(viz_path))
+        
 
         return {
             "summary": feedback.summary,
