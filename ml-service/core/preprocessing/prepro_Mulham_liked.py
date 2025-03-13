@@ -56,5 +56,4 @@ class AudioProcessor:
         self.normalize_audio()  # Восстанавливаем громкость
         self.save_audio(output_file)
 
-processor = AudioProcessor("good_playing.mp3")
-processor.process()
+

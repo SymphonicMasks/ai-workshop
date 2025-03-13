@@ -8,7 +8,13 @@ from music21 import stream, chord, converter, key, meter, tie
 from music21.note import Note
 from music21 import environment
 
-environment.UserSettings()['lilypondPath'] = '/usr/bin/lilypond'
+import platform
+if platform.system() == 'Windows':
+    lilypond_path = r"C:\Users\ITMO-Share\Downloads\lilypond-2.24.4\bin\lilypond.exe"
+else:
+    lilypond_path = '/usr/bin/lilypond'
+
+environment.UserSettings()['lilypondPath'] = lilypond_path
 
 
 class SubmissionProcessor:

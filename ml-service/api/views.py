@@ -91,6 +91,13 @@ async def make_feedback(
         temp_dir = Path("temp")
         processed_dir = temp_dir / "processed"
         output_dir = temp_dir / "output"
+        base_dir = Path(__file__).parent.parent
+        data_dir = base_dir / "data"
+        orig_midi_path = data_dir / "scores" / "base.midi"
+        visualization_dir = data_dir / "visuals"
+
+        # Создаем директории при необходимости
+        visualization_dir.mkdir(parents=True, exist_ok=True)
         
         for dir_path in [temp_dir, processed_dir, output_dir]:
             dir_path.mkdir(exist_ok=True)
@@ -100,7 +107,6 @@ async def make_feedback(
         input_path = temp_dir / f"input_{timestamp}.wav"
         processed_path = processed_dir / f"processed_{timestamp}.wav"
         midi_path = output_dir / f"midi_{timestamp}.mid"
-        visualization_xml_dir = "ai-workshop/ml-service/data/visuals"
 
         
         # Сохраняем входной файл
@@ -114,7 +120,6 @@ async def make_feedback(
         # Конвертация в MIDI
         pitcher = BasicPitcher()
         submitted_midi_data = pitcher.save_midi(str(processed_path), str(midi_path))
-        orig_midi_data = pretty_midi.PrettyMIDI(r"C:\Users\ITMO-Share\ai-workshop\ml-service\data\1\base.midi")
         
         sheet_gen = SheetGenerator(fractions=[0.25, 0.5, 1, 2, 4], pause_fractions=[0.25, 0.5, 1, 2, 4], default_path=Path(visualization_xml_dir))
 
@@ -144,11 +149,15 @@ async def make_feedback(
         input_path.unlink()
         processed_path.unlink()
         
-        # Формируем ответ
-        return FeedbackResponse(
-            agent_feedback = feedback,
-            shit = FileResponse(visualization_xml_dir / "musicxml.xml")
-        )
+        filename = f"comparison_{timestamp}.xml"
+        viz_path = visualization_dir / filename
+        stream_error.write('musicxml', fp=str(viz_path))
+
+        return {
+            "summary": feedback.summary,
+            "wrong_parts": feedback.wrong_parts,
+            "visualization_filename": filename
+        }
         
     except Exception as e:
         await logger.error(f"Error processing feedback request: {str(e)}")
@@ -156,3 +165,10 @@ async def make_feedback(
             status_code=500,
             detail=f"Error processing feedback request: {str(e)}"
         )
+
+@app.get("/visualization/{filename}")
+async def get_visualization(filename: str):
+    file_path = visualization_dir / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path)

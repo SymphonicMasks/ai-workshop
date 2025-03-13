@@ -60,5 +60,3 @@ class AudioProcessor:
         self.normalize_audio()
         self.save_audio(output_file)
 
-processor = AudioProcessor("good_playing.mp3")
-processor.process()
