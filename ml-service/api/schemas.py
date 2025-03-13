@@ -3,8 +3,9 @@ from pydantic import (
     Field,
 )
 from enum import Enum
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Literal
 from fastapi.responses import FileResponse
+
 
 
 class VersionModel(BaseModel):
@@ -20,12 +21,6 @@ class FeedbackDetail(BaseModel):
     timestamp: Optional[float] = Field(None, description="Временная метка в секундах")
     measure: Optional[int] = Field(None, description="Номер такта")
     note: Optional[str] = Field(None, description="Нота, к которой относится замечание")
-
-
-class FeedbackResponse(BaseModel):
-    """Структурированный ответ с рекомендациями"""
-    agent_feedback: FeedbackRequest,
-    shit: FileResponse
     
 
 class NoteResult(BaseModel):
@@ -37,7 +32,6 @@ class NoteResult(BaseModel):
     tact_number: int
     start_time: float
     end_time: float
-
 
 class FeedbackRequest(BaseModel):
     result: List[NoteResult]
@@ -58,3 +52,9 @@ class StructuredFeedback(BaseModel):
         default_factory=list,
         description='Список конкретных ошибок по тактам'
     )
+
+
+class FeedbackResponse(BaseModel):
+    """Структурированный ответ с рекомендациями"""
+    agent_feedback: FeedbackRequest
+    shit: FileResponse

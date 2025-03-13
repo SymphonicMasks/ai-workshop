@@ -3,16 +3,17 @@ from pathlib import Path
 import aiohttp
 import json
 import os
+import pretty_midi
 
 from fastapi import FastAPI, UploadFile, File, Request, Response, HTTPException
 from fastapi.responses import FileResponse
-from api.schemas import VersionModel, FeedbackResponse, InstrumentType, FeedbackRequest
+from api.schemas import VersionModel, FeedbackResponse, FeedbackRequest, StructuredFeedback
 from api.logger import setup_logger
+from core.sheet_music.generator import SheetGenerator
 
 from core.preprocessing.preprocessor import AudioProcessor
 from core.pitch.basic_pitcher import BasicPitcher
 from core.music_submission import SubmissionProcessor
-from music21.converter import parse
 
 logger = None
 
@@ -81,7 +82,6 @@ async def predict_midi(audio: UploadFile = File()) -> FileResponse:
 
 @app.post('/feedback', response_model=FeedbackResponse, description='Анализ исполнения')
 async def make_feedback(
-    instrument: InstrumentType,
     audio: UploadFile = File(...),
     key: str = "C",
     time_signature: str = "4/4"
@@ -100,7 +100,7 @@ async def make_feedback(
         input_path = temp_dir / f"input_{timestamp}.wav"
         processed_path = processed_dir / f"processed_{timestamp}.wav"
         midi_path = output_dir / f"midi_{timestamp}.mid"
-        visualization_xml_dir = "C:\Users\ITMO-Share\ai-workshop\ml-service\data\visuals\"
+        visualization_xml_dir = "ai-workshop\ml-service\data\visuals"
 
         
         # Сохраняем входной файл
@@ -116,7 +116,7 @@ async def make_feedback(
         submitted_midi_data = pitcher.save_midi(str(processed_path), str(midi_path))
         orig_midi_data = pretty_midi.PrettyMIDI("C:\Users\ITMO-Share\ai-workshop\ml-service\data\1\base.midi")
         
-        sheet_gen = SheetGenerator(fractions=[0.25, 0.5, 1, 2, 4], pause_fractions=[0.25, 0.5, 1, 2, 4], default_path=Path(sheet_path))
+        sheet_gen = SheetGenerator(fractions=[0.25, 0.5, 1, 2, 4], pause_fractions=[0.25, 0.5, 1, 2, 4], default_path=Path(visualization_xml_dir))
 
         original_stream = sheet_gen.invoke(orig_midi_data)
         notes, tempo = sheet_gen.get_notes_from_midi(submitted_midi_data)
