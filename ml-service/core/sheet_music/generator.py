@@ -101,7 +101,7 @@ class SheetGenerator:
         return output_path
 
     def invoke(self, midi_data: pretty_midi.PrettyMIDI, output_path: Optional[Union[Path, str]] = None,
-                 time_signature: Tuple[int, int] = (4, 4), key: Tuple[str, str] = None, tempo: float = None) -> str:
+                 time_signature: Tuple[int, int] = (4, 4), key: Tuple[str, str] = None, tempo: float = None) -> stream.Stream:
         notes, tempo = self.get_notes_from_midi(midi_data, tempo)
         stream1 = self._preprocess_notes(notes, tempo, time_signature=time_signature, key=key)
 
@@ -110,4 +110,4 @@ class SheetGenerator:
 
         stream1.write('musicxml', fp=output_path)
 
-        return str(output_path)
+        return stream1

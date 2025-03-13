@@ -6,7 +6,7 @@ import os
 
 from fastapi import FastAPI, UploadFile, File, Request, Response, HTTPException
 from fastapi.responses import FileResponse
-from api.schemas import VersionModel, FeedbackResponse, InstrumentType
+from api.schemas import VersionModel, FeedbackResponse, InstrumentType, FeedbackRequest
 from api.logger import setup_logger
 
 from core.preprocessing.preprocessor import AudioProcessor
@@ -76,6 +76,7 @@ async def get_version() -> VersionModel:
 @app.post('/predict/midi', description='Предсказание midi файла из аудио')
 async def predict_midi(audio: UploadFile = File(...)) -> FileResponse:
     # Здесь должен быть супер код умный
+
     return FileResponse('test.mid', filename='result.mid')
 
 
@@ -100,6 +101,8 @@ async def make_feedback(
         input_path = temp_dir / f"input_{timestamp}.wav"
         processed_path = processed_dir / f"processed_{timestamp}.wav"
         midi_path = output_dir / f"midi_{timestamp}.mid"
+        visualization_xml_dir = "C:\Users\ITMO-Share\ai-workshop\ml-service\data\visuals\"
+
         
         # Сохраняем входной файл
         with open(input_path, "wb") as f:
@@ -111,22 +114,24 @@ async def make_feedback(
         
         # Конвертация в MIDI
         pitcher = BasicPitcher()
-        midi_data = pitcher.save_midi(str(processed_path), str(midi_path))
+        submitted_midi_data = pitcher.save_midi(str(processed_path), str(midi_path))
+        orig_midi_data = pretty_midi.PrettyMIDI("C:\Users\ITMO-Share\ai-workshop\ml-service\data\1\base.midi")
         
-        # Формируем данные для chat-service
-        chat_data = {
-            "instrument": instrument,
-            "key": key,
-            "time_signature": time_signature,
-            "midi_path": str(midi_path),
-            "original_score_path": f"data/scores/{instrument}/{key}.xml"  # Предполагаем такую структуру
-        }
-        
+        sheet_gen = SheetGenerator(fractions=[0.25, 0.5, 1, 2, 4], pause_fractions=[0.25, 0.5, 1, 2, 4], default_path=Path(sheet_path))
+
+        original_stream = sheet_gen.invoke(orig_midi_data)
+        notes, tempo = sheet_gen.get_notes_from_midi(submitted_midi_data)
+
+        submitter = SubmissionProcessor(original_stream, notes, tempo, visualization_xml_dir)
+        compared_data_res = submitter.make_viz_new_algo()
+
+        submit_data = FeedbackRequest({"result": compared_data_res})
+
         # Отправляем запрос в chat-service
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{CHAT_SERVICE_URL}/analyze",
-                json=chat_data
+                f"{CHAT_SERVICE_URL}/feedback",
+                json=submit_data
             ) as response:
                 if response.status != 200:
                     raise HTTPException(
@@ -135,17 +140,15 @@ async def make_feedback(
                     )
                 feedback_data = await response.json()
         
+        feedback = StructuredFeedback(feedback_data)
         # Очищаем временные файлы
         input_path.unlink()
         processed_path.unlink()
         
         # Формируем ответ
         return FeedbackResponse(
-            overall_feedback=feedback_data["overall_feedback"],
-            details=feedback_data["details"],
-            score=feedback_data["score"],
-            visualization_url=feedback_data.get("visualization_url"),
-            midi_url=str(midi_path)
+            agent_feedback = feedback,
+            shit = FileResponse(visualization_xml_dir / "musicxml.xml")
         )
         
     except Exception as e:
