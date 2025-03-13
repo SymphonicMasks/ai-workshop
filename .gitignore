@@ -6,3 +6,5 @@
 __pycache__
 .vscode/
 ml-service/logs
+
+frontend/node_modules

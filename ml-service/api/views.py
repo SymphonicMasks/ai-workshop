@@ -74,10 +74,9 @@ async def get_version() -> VersionModel:
 
 
 @app.post('/predict/midi', description='Предсказание midi файла из аудио')
-async def predict_midi(audio: UploadFile = File(...)) -> FileResponse:
+async def predict_midi(audio: UploadFile = File()) -> FileResponse:
     # Здесь должен быть супер код умный
-
-    return FileResponse('test.mid', filename='result.mid')
+    return FileResponse('ml-service\data\violin.xml', filename='result.mid')
 
 
 @app.post('/feedback', response_model=FeedbackResponse, description='Анализ исполнения')
