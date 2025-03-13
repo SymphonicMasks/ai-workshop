@@ -34,32 +34,22 @@ async def startup_event():
 async def log_requests(request: Request, call_next):
     start_time = time.time()
 
-    body = await request.body()
+    # Убираем чтение тела запроса для логов
     await logger.info(
-        f"Incoming request: {request.method} {request.url}\n"
-        f"Request body: {body.decode()}"
+        f"Incoming request: {request.method} {request.url}"
     )
 
     response = await call_next(request)
     process_time = time.time() - start_time
 
-    response_body = b""
-    async for chunk in response.body_iterator:
-        response_body += chunk
-
+    # Убираем чтение тела ответа
     await logger.info(
         f"Request completed: {request.method} {request.url}\n"
         f"Status: {response.status_code}\n"
-        f"Response body: {response_body.decode()}\n"
         f"Duration: {process_time:.3f}s"
     )
 
-    return Response(
-        content=response_body,
-        status_code=response.status_code,
-        headers=dict(response.headers),
-        media_type=response.media_type,
-    )
+    return response
 
 @app.get(
     '/version',
