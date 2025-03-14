@@ -120,8 +120,8 @@ async def make_feedback(
         orig_midi_data = pretty_midi.PrettyMIDI(str(orig_midi_path))
 
         sheet_gen = SheetGenerator(
-            fractions=[0.25, 0.5, 1, 2, 4], 
-            pause_fractions=[0.25, 0.5, 1, 2, 4], 
+            fractions=[0.125, 0.25, 0.5, 1, 2, 4], 
+            pause_fractions=[0.125, 0.25, 0.5, 1, 2, 4], 
             default_path=XMLS_DIR)
 
         original_stream = sheet_gen.invoke(orig_midi_data)
