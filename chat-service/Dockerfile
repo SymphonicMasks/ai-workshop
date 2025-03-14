@@ -11,6 +11,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN chmod +x entrypoint.sh
+# RUN chmod +x entrypoint.sh
 
-CMD ["./entrypoint.sh"]
+CMD python -m uvicorn api:app --port 8081

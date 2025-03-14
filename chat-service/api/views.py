@@ -40,4 +40,4 @@ async def feedback(result: FeedbackRequest) -> Response:
     # Генерация фидбека
     feedback = agent.generate_feedback(result)
 
-    return Response(content=feedback, media_type="applilcation/text")
+    return Response(content=feedback, media_type="application/json")
