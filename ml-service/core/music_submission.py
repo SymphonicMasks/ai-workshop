@@ -235,9 +235,9 @@ class SubmissionProcessor:
                 break
         
             if played_duration and original_duration:
-                if played_duration > original_duration * 1.2:
+                if played_duration > original_duration * 2:
                     status = "duration+"
-                elif played_duration < original_duration * 0.8:
+                elif played_duration < original_duration * 0.5:
                     status = "duration-"
             results.append({
                 "original_note": pretty_midi.note_number_to_name(correct_note) if correct_note is not None else "None",

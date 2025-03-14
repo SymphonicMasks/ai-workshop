@@ -87,7 +87,7 @@ async def make_feedback(
         
         # Убираем старые определения путей
         base_dir = Path(__file__).parent.parent
-        orig_midi_path = base_dir / "data" / "scores" / "base.mid"
+        orig_midi_path = base_dir / "data" / "scores" / "base.midi"
 
         # Генерируем уникальные имена файлов
         timestamp = str(int(time.time()))
