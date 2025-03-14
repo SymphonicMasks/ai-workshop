@@ -19,47 +19,46 @@ function Chatbot() {
       { role: 'assistant', content: '', xml: '', errors: [], loading: true }
     ]);
 
-    // const imitateRequest = new Promise(resolve => {
-    //   setTimeout(()=>{
-    //     resolve
-    //   }, 1000)
-    // })
+    try {
+      // 1. Отправляем аудио на обработку
+      const formData = new FormData();
+      formData.append('audio', record, 'recording.wav');
+      
+      const feedbackRes = await fetch('http://127.0.0.1:8081/feedback', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!feedbackRes.ok) throw new Error('Feedback request failed');
+      const { filename } = await feedbackRes.json();
 
-    fetch('http://127.0.0.1:8081/version').then(data => data.text()).then(console.log);
-    fetch('comparison_1741961778.xml').then(data => data.text()).then((data)=>{
+      // 2. Получаем сгенерированный XML
+      const vizRes = await fetch(`http://127.0.0.1:8081/visualization/${filename}`);
+      if (!vizRes.ok) throw new Error('Visualization request failed');
+      const xmlData = await vizRes.text();
 
-        try {
-          setMessages(draft => {
-            const index = draft.length - 1
-            draft[index] = {
-              ...draft[index],
-              content: 'Какой-то отзыв об игре',
-              xml: data,
-              result: [
-                {
-                  original_note: 'A',
-                  played_note: "D",
-                  status: "wrong",
-                  original_duration: '0.8',
-                  played_duration: '1',
-                  tact_number: 5,
-                  start_time: 12.6,
-                  end_time: 14.6
-                }
-              ],
-              loading: true
-            };
+      // 3. Обновляем состояние с полученными данными
+      setMessages(draft => {
+        const index = draft.length - 1;
+        draft[index] = {
+          ...draft[index],
+          content: 'Анализ вашего исполнения',
+          xml: xmlData,
+          loading: false
+        };
+      });
 
-            draft[draft.length - 1].loading = false;
-          });
-        } catch (err) {
-          setMessages(draft => {
-            draft[draft.length - 1].loading = false;
-            draft[draft.length - 1].error = true;
-          });
-        }
-
-    })
+    } catch (err) {
+      setMessages(draft => {
+        const index = draft.length - 1;
+        draft[index] = {
+          ...draft[index],
+          error: true,
+          loading: false,
+          content: 'Ошибка при обработке аудио'
+        };
+      });
+    }
   }
 
   return (
