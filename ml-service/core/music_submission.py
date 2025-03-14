@@ -124,7 +124,7 @@ class SubmissionProcessor:
             correct_note, user_note_obj, status = res
             original_duration = fractions[i] if correct_note is not None else None
             played_duration = (user_note_obj.end - user_note_obj.start) / one_time if user_note_obj else None
-            tact_number = int(user_note_obj.start / one_time) if user_note_obj else None
+            tact_number = int(user_note_obj.start // (one_time * self.time_signature[0])) + 1 if user_note_obj else None
 
             if status == "correct":
                 stream_error.notes[stream_pointer].style.color = "green"
