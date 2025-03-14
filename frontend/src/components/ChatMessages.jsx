@@ -1,4 +1,3 @@
-import Markdown from 'react-markdown';
 import useAutoScroll from '@/hooks/useAutoScroll';
 import Spinner from '@/components/Spinner';
 import userIcon from '@/assets/images/user.svg';
