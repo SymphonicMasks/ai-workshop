@@ -11,7 +11,7 @@ from api.schemas import VersionModel, FeedbackResponse, FeedbackRequest, Structu
 from api.logger import setup_logger
 from core.sheet_music.generator import SheetGenerator
 
-from core.preprocessing.preprocessor import AudioProcessor
+from core.preprocessing.preprocessor_dynamicnr import PianoPreprocessor
 from core.pitch.basic_pitcher import BasicPitcher
 from core.music_submission import SubmissionProcessor
 from config import VISUALIZATIONS_DIR, XMLS_DIR, TEMP_DIR, PROCESSED_DIR, OUTPUT_DIR
@@ -35,22 +35,21 @@ async def startup_event():
 async def log_requests(request: Request, call_next):
     start_time = time.time()
     
-    # Логируем только метаданные запроса
     log_data = {
         "method": request.method,
         "url": str(request.url),
-        "headers": dict(request.headers)
+        "client": request.client.host if request.client else "unknown"
     }
-    await logger.info(f"Request: {log_data}")
-
+    
+    # Логируем без await и упрощаем данные
+    logger.info(f"Request: {log_data['method']} {log_data['url']}")
+    
     response = await call_next(request)
     process_time = time.time() - start_time
 
-    # Логируем только статус и время выполнения
-    await logger.info(
-        f"Response: {response.status_code} | Duration: {process_time:.3f}s"
-    )
-
+    # Логируем только статус код
+    logger.info(f"Response: {response.status_code} ({process_time:.2f}s)")
+    
     return response
 
 @app.get(
@@ -79,6 +78,8 @@ async def make_feedback(
     time_signature: str = "4/4"
 ):
     try:
+
+        await logger.info(f"Creating directories: {[str(p) for p in [VISUALIZATIONS_DIR, XMLS_DIR, TEMP_DIR, PROCESSED_DIR, OUTPUT_DIR]]}")
         VISUALIZATIONS_DIR.mkdir(parents=True, exist_ok=True)
         XMLS_DIR.mkdir(parents=True, exist_ok=True)
         TEMP_DIR.mkdir(parents=True, exist_ok=True)
@@ -95,16 +96,25 @@ async def make_feedback(
         processed_path = PROCESSED_DIR / f"processed_{timestamp}.wav"
         midi_path = OUTPUT_DIR / f"midi_{timestamp}.mid"
 
-        
+        await logger.info(f"File paths:\nInput: {input_path}\nProcessed: {processed_path}\nMIDI: {midi_path}")
+
         # Сохраняем входной файл
         with open(input_path, "wb") as f:
             f.write(await audio.read())
-        
+        await logger.info(f"Input file saved: {input_path} ({input_path.stat().st_size} bytes)")
+
+
+        await logger.info(f"Starting audio processing: {input_path} -> {processed_path}")
         # Предобработка аудио
-        processor = AudioProcessor(str(input_path))
-        processor.process(output_file=str(processed_path))
-        
+        processor = PianoPreprocessor(str(input_path))
+        processed_audio, sr = processor.process_pipeline()
+        processor.save_output(str(processed_path))
+        if not processed_path.exists():
+            raise Exception(f"Processed file not created: {processed_path}")
+        await logger.info(f"Audio processed: {processed_path} ({processed_path.stat().st_size} bytes)")
+
         # Конвертация в MIDI
+        await logger.info(f"Starting MIDI conversion: {processed_path}")
         pitcher = BasicPitcher()
         submitted_midi_data = pitcher.invoke(str(processed_path))
         orig_midi_data = pretty_midi.PrettyMIDI(str(orig_midi_path))
@@ -115,7 +125,7 @@ async def make_feedback(
             default_path=XMLS_DIR)
 
         original_stream = sheet_gen.invoke(orig_midi_data)
-        notes, tempo = sheet_gen.get_notes_from_midi(orig_midi_data)
+        notes, tempo = sheet_gen.get_notes_from_midi(submitted_midi_data)
 
         filename = f"comparison_{timestamp}.xml"
         vis_bath = XMLS_DIR / filename
