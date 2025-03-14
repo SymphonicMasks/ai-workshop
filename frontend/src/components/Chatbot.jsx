@@ -26,9 +26,7 @@ function Chatbot() {
     // })
 
     fetch('http://127.0.0.1:8081/version').then(data => data.text()).then(console.log);
-    fetch('violin.xml').then(data => data.text()).then((data)=>{
-
-      setTimeout(()=>{
+    fetch('comparison_1741961778.xml').then(data => data.text()).then((data)=>{
 
         try {
           setMessages(draft => {
@@ -60,7 +58,6 @@ function Chatbot() {
             draft[draft.length - 1].error = true;
           });
         }
-      }, 1000)
 
     })
   }
