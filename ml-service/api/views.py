@@ -85,7 +85,7 @@ async def make_feedback(
         TEMP_DIR.mkdir(parents=True, exist_ok=True)
         PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        
+
         # Убираем старые определения путей
         base_dir = Path(__file__).parent.parent
         orig_midi_path = base_dir / "data" / "scores" / "base.midi"
@@ -120,8 +120,8 @@ async def make_feedback(
         orig_midi_data = pretty_midi.PrettyMIDI(str(orig_midi_path))
 
         sheet_gen = SheetGenerator(
-            fractions=[0.125, 0.25, 0.5, 1, 2, 4], 
-            pause_fractions=[0.125, 0.25, 0.5, 1, 2, 4], 
+            fractions=[0.125, 0.25, 0.5, 1, 2, 4],
+            pause_fractions=[0.125, 0.25, 0.5, 1, 2, 4],
             default_path=XMLS_DIR)
 
         original_stream = sheet_gen.invoke(orig_midi_data)
@@ -171,13 +171,15 @@ async def make_feedback(
         # Очищаем временные файлы
         input_path.unlink()
         processed_path.unlink()
-        
-        
+
+        with open(vis_bath, "r") as f:
+            xml = f.read()
 
         return {
             "summary": feedback.summary,
             "wrong_parts": feedback.wrong_parts,
-            "visualization_filename": filename
+            "visualization_filename": filename,
+            "xml": xml
         }
         
     except Exception as e:
