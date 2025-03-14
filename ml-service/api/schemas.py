@@ -1,3 +1,4 @@
+from fastapi import File
 from pydantic import (
     BaseModel,
     Field,
@@ -7,11 +8,9 @@ from typing import List, Dict, Optional, Literal
 from fastapi.responses import FileResponse
 
 
-
 class VersionModel(BaseModel):
     """Версия API"""
     version: str = Field(default=None, title='Версия', description='Номер версии в виде X.Y[.Z]')
-
 
 
 class FeedbackDetail(BaseModel):
@@ -21,7 +20,7 @@ class FeedbackDetail(BaseModel):
     timestamp: Optional[float] = Field(None, description="Временная метка в секундах")
     measure: Optional[int] = Field(None, description="Номер такта")
     note: Optional[str] = Field(None, description="Нота, к которой относится замечание")
-    
+
 
 class NoteResult(BaseModel):
     original_note: str
@@ -33,8 +32,10 @@ class NoteResult(BaseModel):
     start_time: float
     end_time: float
 
+
 class FeedbackRequest(BaseModel):
     result: List[NoteResult]
+
 
 class WrongPartFeedback(BaseModel):
     """Структура для описания ошибки в конкретном такте"""
@@ -58,3 +59,4 @@ class FeedbackResponse(BaseModel):
     summary: str
     wrong_parts: List[WrongPartFeedback]
     visualization_filename: str
+    xml: str
