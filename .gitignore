@@ -10,3 +10,6 @@ frontend/node_modules
 ml-service/ffmpeg
 ml-service/data/temp
 ml-service/data/xmls
+ml-service/data
+frontend/node_modules
+ML
