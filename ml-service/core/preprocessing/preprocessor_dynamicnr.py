@@ -5,12 +5,33 @@ from pydub import AudioSegment
 from scipy.signal import butter, filtfilt
 from api.logger import setup_logger
 import logging
+from pathlib import Path
 
+from pydub import AudioSegment
+import os
+
+# Добавить перед использованием AudioSegment
+ffmpeg_path = Path(__file__).parent.parent.parent / "ffmpeg" / "bin" / "ffmpeg.exe"
+ffprobe_path = Path(__file__).parent.parent.parent / "ffmpeg" / "bin" / "ffprobe.exe"
+
+if ffmpeg_path.exists():
+    AudioSegment.ffmpeg = str(ffmpeg_path)
+    os.environ["PATH"] += os.pathsep + str(ffmpeg_path.parent)
+else:
+    print(f"ВНИМАНИЕ: ffmpeg не найден по пути {ffmpeg_path}")
+
+if ffprobe_path.exists():
+    AudioSegment.ffprobe = str(ffprobe_path)
+else:
+    print(f"ВНИМАНИЕ: ffprobe не найден по пути {ffprobe_path}")
+
+print("Текущий путь к ffmpeg:", AudioSegment.ffmpeg)
+print("PATH:", os.environ["PATH"])
 
 class PianoPreprocessor:
     def __init__(self, input_path, target_sr=22050, output_channels=1):
-        print(f"[PianoPreprocessor] Инициализация для: {input_path}")
-        self.input_path = input_path
+        self.input_path = Path(input_path)
+        print(f"[PianoPreprocessor] Инициализация для: {self.input_path}")
         self.target_sr = target_sr
         self.output_channels = output_channels
         self.audio = None
