@@ -24,6 +24,33 @@ async function sendChatMessage(chatId, message) {
   return res.body;
 }
 
+async function sendFeedbackRequest(gameResults) {
+  const res = await fetch(BASE_URL + '/feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ result: gameResults })
+  });
+  
+  if (!res.ok) {
+    return Promise.reject({ status: res.status, data: await res.json() });
+  }
+  
+  return await res.json();
+}
+
+async function getVisualization(filename) {
+  const res = await fetch(BASE_URL + `/vizualisations/${filename}`, {
+    method: 'GET',
+    headers: { 'Accept': 'application/xml' }
+  });
+  
+  if (!res.ok) {
+    return Promise.reject({ status: res.status, data: await res.text() });
+  }
+  
+  return await res.text(); // Возвращаем XML как текст
+}
+
 export default {
-  createChat, sendChatMessage
+  createChat, sendChatMessage, sendFeedbackRequest, getVisualization
 };
