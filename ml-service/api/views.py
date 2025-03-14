@@ -112,19 +112,20 @@ async def make_feedback(
         # Конвертация в MIDI
         pitcher = BasicPitcher()
         submitted_midi_data = pitcher.save_midi(str(processed_path), str(midi_path))
-        orig_midi_data = pretty_midi.PrettyMIDI(r"ml-service\data\1\base.midi")
-        
-        sheet_gen = SheetGenerator(fractions=[0.25, 0.5, 1, 2, 4], pause_fractions=[0.25, 0.5, 1, 2, 4], default_path=Path(visualization_xml_dir))
+        orig_midi_data = pretty_midi.PrettyMIDI(str(orig_midi_path))
+
+        sheet_gen = SheetGenerator(
+            fractions=[0.25, 0.5, 1, 2, 4], 
+            pause_fractions=[0.25, 0.5, 1, 2, 4], 
+            default_path=visualization_xml_dir)
 
         original_stream = sheet_gen.invoke(orig_midi_data)
-        notes, tempo = sheet_gen.get_notes_from_midi(orig_midi_data)
+        notes, tempo = sheet_gen.get_notes_from_midi(submitted_midi_data)
 
         submitter = SubmissionProcessor(original_stream, notes, tempo, str(visualization_xml_dir))
         compared_data_res = submitter.make_viz_new_algo()
 
         filename = f"comparison_{timestamp}.xml"
-        viz_path = visualization_dir / filename
-        submitter.stream_error.write('musicxml', fp=str(viz_path))
 
         submit_data = FeedbackRequest({"result": compared_data_res})
 

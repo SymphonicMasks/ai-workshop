@@ -10,7 +10,7 @@ from music21 import environment
 
 import platform
 if platform.system() == 'Windows':
-    lilypond_path = r"C:\Users\ITMO-Share\Downloads\lilypond-2.24.4\bin\lilypond.exe"
+    lilypond_path = r"D:\lilypond-2.24.4\bin\lilypond.exe"
 else:
     lilypond_path = '/usr/bin/lilypond'
 
