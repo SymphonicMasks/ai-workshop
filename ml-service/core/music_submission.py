@@ -7,6 +7,8 @@ import pretty_midi
 from music21 import stream, chord, converter, key, meter, tie
 from music21.note import Note
 from music21 import environment
+from config import XMLS_DIR
+
 
 import platform
 if platform.system() == 'Windows':
@@ -23,7 +25,7 @@ class SubmissionProcessor:
     the original music.
     """
 
-    def __init__(self, original_stream: stream.Stream, user_notes: List[pretty_midi.Note], tempo: int, viz_path: str,
+    def __init__(self, original_stream: stream.Stream, user_notes: List[pretty_midi.Note], tempo: int, viz_path: str = None,
                  key: Optional[List[str]] = None, only_notes: bool = False,
                  note_fractions: Optional[List[float]] = None,
                  time_signature: Tuple[int, int] = (4, 4)):
