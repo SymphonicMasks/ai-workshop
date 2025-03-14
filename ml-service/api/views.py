@@ -33,33 +33,24 @@ async def startup_event():
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
-
-    body = await request.body()
-    await logger.info(
-        f"Incoming request: {request.method} {request.url}\n"
-        f"Request body: {body.decode()}"
-    )
+    
+    # Логируем только метаданные запроса
+    log_data = {
+        "method": request.method,
+        "url": str(request.url),
+        "headers": dict(request.headers)
+    }
+    await logger.info(f"Request: {log_data}")
 
     response = await call_next(request)
     process_time = time.time() - start_time
 
-    response_body = b""
-    async for chunk in response.body_iterator:
-        response_body += chunk
-
+    # Логируем только статус и время выполнения
     await logger.info(
-        f"Request completed: {request.method} {request.url}\n"
-        f"Status: {response.status_code}\n"
-        f"Response body: {response_body.decode()}\n"
-        f"Duration: {process_time:.3f}s"
+        f"Response: {response.status_code} | Duration: {process_time:.3f}s"
     )
 
-    return Response(
-        content=response_body,
-        status_code=response.status_code,
-        headers=dict(response.headers),
-        media_type=response.media_type,
-    )
+    return response
 
 @app.get(
     '/version',
@@ -91,6 +82,14 @@ async def make_feedback(
         temp_dir = Path("temp")
         processed_dir = temp_dir / "processed"
         output_dir = temp_dir / "output"
+        base_dir = Path(__file__).parent.parent
+        data_dir = base_dir / "data"
+        orig_midi_path = data_dir / "scores" / "base.midi"
+        visualization_dir = data_dir / "visuals"
+        visualization_xml_dir = data_dir / "xmls"
+
+        # Создаем директории при необходимости
+        visualization_dir.mkdir(parents=True, exist_ok=True)
         
         for dir_path in [temp_dir, processed_dir, output_dir]:
             dir_path.mkdir(exist_ok=True)
@@ -100,7 +99,6 @@ async def make_feedback(
         input_path = temp_dir / f"input_{timestamp}.wav"
         processed_path = processed_dir / f"processed_{timestamp}.wav"
         midi_path = output_dir / f"midi_{timestamp}.mid"
-        visualization_xml_dir = "ai-workshop/ml-service/data/visuals"
 
         
         # Сохраняем входной файл
@@ -119,10 +117,14 @@ async def make_feedback(
         sheet_gen = SheetGenerator(fractions=[0.25, 0.5, 1, 2, 4], pause_fractions=[0.25, 0.5, 1, 2, 4], default_path=Path(visualization_xml_dir))
 
         original_stream = sheet_gen.invoke(orig_midi_data)
-        notes, tempo = sheet_gen.get_notes_from_midi(submitted_midi_data)
+        notes, tempo = sheet_gen.get_notes_from_midi(orig_midi_data)
 
-        submitter = SubmissionProcessor(original_stream, notes, tempo, visualization_xml_dir)
+        submitter = SubmissionProcessor(original_stream, notes, tempo, str(visualization_xml_dir))
         compared_data_res = submitter.make_viz_new_algo()
+
+        filename = f"comparison_{timestamp}.xml"
+        viz_path = visualization_dir / filename
+        submitter.stream_error.write('musicxml', fp=str(viz_path))
 
         submit_data = FeedbackRequest({"result": compared_data_res})
 
@@ -144,11 +146,13 @@ async def make_feedback(
         input_path.unlink()
         processed_path.unlink()
         
-        # Формируем ответ
-        return FeedbackResponse(
-            agent_feedback = feedback,
-            shit = FileResponse(visualization_xml_dir / "musicxml.xml")
-        )
+        
+
+        return {
+            "summary": feedback.summary,
+            "wrong_parts": feedback.wrong_parts,
+            "visualization_filename": filename
+        }
         
     except Exception as e:
         await logger.error(f"Error processing feedback request: {str(e)}")
@@ -156,3 +160,10 @@ async def make_feedback(
             status_code=500,
             detail=f"Error processing feedback request: {str(e)}"
         )
+
+@app.get("/visualization/{filename}")
+async def get_visualization(filename: str):
+    file_path = visualization_dir / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path)

@@ -55,6 +55,6 @@ class StructuredFeedback(BaseModel):
 
 
 class FeedbackResponse(BaseModel):
-    """Структурированный ответ с рекомендациями"""
-    agent_feedback: FeedbackRequest
-    shit: FileResponse
+    summary: str
+    wrong_parts: List[WrongPartFeedback]
+    visualization_filename: str

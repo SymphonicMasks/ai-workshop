@@ -8,7 +8,7 @@ from config import DEFAULT_TEMP_MIDI_PATH
 from core.pitch.__base.pitcher import BasePitcher
 
 
-class BasicPitcher(ABC, BasePitcher):
+class BasicPitcher(BasePitcher):
     pitcher_name = 'basic_pitcher'
     default_path = DEFAULT_TEMP_MIDI_PATH
 
