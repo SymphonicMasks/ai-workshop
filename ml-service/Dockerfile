@@ -4,6 +4,9 @@ WORKDIR /app
 
 RUN apt-get -y update
 RUN apt-get -y install curl
+RUN apt-get install -y --no-install-recommends  \
+    ffmpeg \
+    lilypond
 
 COPY requirements.txt .
 
