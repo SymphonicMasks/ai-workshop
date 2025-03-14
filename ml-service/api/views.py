@@ -126,7 +126,7 @@ async def make_feedback(
 
         original_stream = sheet_gen.invoke(orig_midi_data)
         notes, tempo = sheet_gen.get_notes_from_midi(submitted_midi_data)
-
+        # print(notes, tempo)
         filename = f"comparison_{timestamp}.xml"
         vis_bath = XMLS_DIR / filename
 
@@ -138,7 +138,6 @@ async def make_feedback(
             time_signature=(4, 4)
         )
         compared_data_res = submitter.make_viz_new_algo()
-
 
         submit_data = FeedbackRequest(
             result=[
@@ -154,7 +153,6 @@ async def make_feedback(
                 ) for note in compared_data_res
             ]
         )
-
         # Отправляем запрос в chat-service
         async with aiohttp.ClientSession() as session:
             async with session.post(

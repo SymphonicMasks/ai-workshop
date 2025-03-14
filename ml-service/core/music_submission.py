@@ -12,7 +12,7 @@ from config import XMLS_DIR
 
 import platform
 if platform.system() == 'Windows':
-    lilypond_path = r"C:\Users\ITMO-Share\Downloads\lilypond-2.24.4\bin\lilypond.exe"
+    lilypond_path = r"D:\lilypond-2.24.4\bin\lilypond.exe"
 else:
     lilypond_path = '/usr/bin/lilypond'
 
@@ -124,7 +124,13 @@ class SubmissionProcessor:
             correct_note, user_note_obj, status = res
             original_duration = fractions[i] if correct_note is not None else None
             played_duration = (user_note_obj.end - user_note_obj.start) / one_time if user_note_obj else None
-            tact_number = int(user_note_obj.start / one_time) if user_note_obj else None
+            tact_number = int(user_note_obj.start // (one_time * self.time_signature[0])) + 1 if user_note_obj else None
+
+            if played_duration and original_duration:
+                if played_duration > original_duration * 1.8:
+                    status = "duration+"
+                elif played_duration < original_duration * 0.5:
+                    status = "duration-"
 
             if status == "correct":
                 stream_error.notes[stream_pointer].style.color = "green"
@@ -146,7 +152,7 @@ class SubmissionProcessor:
             stream_pointer += 1
             if stream_pointer >= len(stream_error.notes):
                 break
-        
+                
             if played_duration and original_duration:
                 played_duration = min(
                     self.note_fractions, 
@@ -157,6 +163,7 @@ class SubmissionProcessor:
                     status = "duration+"
                 elif played_duration < original_duration:
                     status = "duration-"
+
             results.append({
                 "original_note": pretty_midi.note_number_to_name(correct_note) if correct_note is not None else "None",
                 "played_note": pretty_midi.note_number_to_name(user_note_obj.pitch) if user_note_obj else "None",
