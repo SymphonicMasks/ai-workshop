@@ -1,11 +1,7 @@
-import useAutosize from '@/hooks/useAutosize';
-import sendIcon from '@/assets/images/send.svg';
-import deleteIcon from '@/assets/images/delete.svg';
-import micIcon from '@/assets/images/mic.svg';
-import stopIcon from '@/assets/images/stop.svg';
+import sendIcon from '../assets/images/send.svg';
+import deleteIcon from '../assets/images/delete.svg';
 import {AudioRecorder, useAudioRecorder} from 'react-audio-voice-recorder';
-import {useEffect, useState} from "react";
-import {Player} from 'tailwind-player';
+import {useState} from "react";
 import './ChatInput.css'
 //...
 

@@ -1,29 +1,21 @@
 import {useEffect, useRef, useState} from "react";
 import * as vexml from '@stringsync/vexml';
-import deleteIcon from "@/assets/images/delete.svg";
-import {AudioRecorder} from "react-audio-voice-recorder";
-import sendIcon from "@/assets/images/send.svg";
-import directionIcon from "@/assets/images/next-icon.svg"
-
+import directionIcon from "../assets/images/next-icon.svg"
+import {errors} from './mock'
 
 function Sheets({data}) {
     const ref = useRef(null)
-    const div = ref.current
-
-    const rendererRef = useRef(null);
 
     const [score, setScore] = useState(null);
     const [cursor, setCursor] = useState(null);
 
-    const fragmentCursor = useRef(null);
-    const fragmentWidth = 200;
+    const [index, setIndex] = useState();
 
-    const [currentError, setCurrentError] = useState(3);
+    const error = Number.isInteger(index)  ? errors.wrong_parts[index] : undefined;
 
 
     const toNextError = () => {
         cursor.next();
-        // cursor.goTo();
     }
 
     const toPreviousError = () => {
@@ -42,14 +34,15 @@ function Sheets({data}) {
         // Render
         const cursorComponent = vexml.SimpleCursor.render(score.getOverlayElement());
 
-        console.log(score.getMeasures()[3].getFragments()[0].getParts()[0].getStaves()[0].getVoices()[0].getEntries()[0]);
         const rect = cursorModel.getState().cursorRect.toRectLike()
         cursorComponent.update({...rect, w: 500, x: 200})
         // Listen
         cursorModel.addEventListener(
             'change',
             (e) => {
-                const rect = score.getMeasures()[e.index].rect()
+                const part = errors.wrong_parts[e.index].tact_index
+                setIndex(e.index)
+                const rect = score.getMeasures()[part].rect();
                 cursorComponent.update(rect);
 
                 const cursor = document.querySelector('.vexml-cursor')
@@ -79,7 +72,8 @@ function Sheets({data}) {
 
 
               <div  className="w-full h-full flex flex-nowrap items-center justify-center">
-В IT, как и в драке, главное — не скорость, а точность. Один точный удар — и всё падает.              </div>
+                  {error ? error.feedback : ''}
+              </div>
 
                 <button
                 className='w-[30px] h-[30px] p-1 rounded-md hover:bg-primary-blue/20 flex-shrink-0'

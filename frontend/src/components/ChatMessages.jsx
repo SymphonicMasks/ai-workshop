@@ -1,8 +1,8 @@
-import useAutoScroll from '@/hooks/useAutoScroll';
-import Spinner from '@/components/Spinner';
-import userIcon from '@/assets/images/user.svg';
-import errorIcon from '@/assets/images/error.svg';
-import Sheets from "@/components/Sheets.jsx";
+import useAutoScroll from '../hooks/useAutoScroll';
+import Spinner from './Spinner';
+import userIcon from '../assets/images/user.svg';
+import errorIcon from '../assets/images/error.svg';
+import Sheets from "./Sheets.jsx";
 
 function ChatMessages({ messages, isLoading }) {
   const scrollContentRef = useAutoScroll(isLoading);

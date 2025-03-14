@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useImmer } from 'use-immer';
-import api from '@/api';
-import { parseSSEStream } from '@/utils';
-import ChatMessages from '@/components/ChatMessages';
-import ChatInput from '@/components/ChatInput';
+import ChatMessages from './ChatMessages';
+import ChatInput from './ChatInput';
 
 function Chatbot() {
   const [chatId, setChatId] = useState(null);
@@ -23,12 +21,12 @@ function Chatbot() {
       // 1. Отправляем аудио на обработку
       const formData = new FormData();
       formData.append('audio', record, 'recording.wav');
-      
-      const feedbackRes = await fetch('http://127.0.0.1:8081/feedback', {
+
+      const feedbackRes = await fetch('http://127.0.0.1:8080/feedback', {
         method: 'POST',
         body: formData
       });
-      
+
       if (!feedbackRes.ok) throw new Error('Feedback request failed');
       const { filename } = await feedbackRes.json();
 
@@ -70,7 +68,7 @@ function Chatbot() {
           <select id="countries"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             <option selected>Выбери трек</option>
-            <option value="US">United States</option>
+            <option value="US">Test song</option>
             <option value="CA">Canada</option>
             <option value="FR">France</option>
             <option value="DE">Germany</option>

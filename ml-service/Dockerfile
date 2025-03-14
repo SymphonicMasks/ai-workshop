@@ -6,7 +6,8 @@ RUN apt-get -y update
 RUN apt-get -y install curl
 RUN apt-get install -y --no-install-recommends  \
     ffmpeg \
-    lilypond
+    lilypond \
+    gcc
 
 COPY requirements.txt .
 
