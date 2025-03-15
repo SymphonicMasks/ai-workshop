@@ -34,7 +34,7 @@ class PianoPreprocessor:
             0.4, 
             0.95
         )
-
+        
         stationary_flag = rms_noise < 0.1 * rms_signal
 
         self.processed_audio = nr.reduce_noise(
@@ -90,23 +90,3 @@ class PianoPreprocessor:
             channels=1
         ).export(output_path, format="wav")
 
-
-#processor = PianoPreprocessor("audio_fullclean.wav")
-#processed_audio, sr = processor.process_pipeline()
-#processor.save_output("audio_fullclean_prep.wav")
-
-#processor = PianoPreprocessor("audio_norm.wav")
-#processed_audio, sr = processor.process_pipeline()
-#processor.save_output("audio_norm_prep.wav")
-
-#processor = PianoPreprocessor("audio_silent.wav")
-#processed_audio, sr = processor.process_pipeline()
-#processor.save_output("audio_silent_prep.wav")
-
-processor = PianoPreprocessor("audio_hot1.wav")
-processed_audio, sr = processor.process_pipeline()
-processor.save_output("audio_hot1_prep.wav")
-
-processor = PianoPreprocessor("audio_hot2.wav")
-processed_audio, sr = processor.process_pipeline()
-processor.save_output("audio_hot2_prep.wav")

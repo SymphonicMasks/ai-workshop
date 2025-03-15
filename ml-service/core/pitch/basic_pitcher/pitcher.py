@@ -7,6 +7,7 @@ from basic_pitch.inference import predict
 from config import DEFAULT_TEMP_MIDI_PATH
 from core.pitch.__base.pitcher import BasePitcher
 
+from preprocessor_dynamicnr import PianoPreprocessor
 
 class BasicPitcher(ABC, BasePitcher):
     pitcher_name = 'basic_pitcher'
@@ -14,10 +15,13 @@ class BasicPitcher(ABC, BasePitcher):
 
     @classmethod
     def invoke(cls, audio_file_path: str) -> pretty_midi.PrettyMIDI:
-        model_output, midi_data, note_events = predict(audio_file_path,
+        processor = PianoPreprocessor(audio_file_path)
+        processed_audio, sr = processor.process_pipeline()
+        processor.save_output("temp_processed.wav")
+        model_output, midi_data, note_events = predict("temp_processed.wav",
                                                        onset_threshold=0.6,
-                                                       minimum_frequency=130.813,
-                                                       maximum_frequency=1278.75)
+                                                       minimum_frequency=16.35,
+                                                       maximum_frequency=7902.13)
         return midi_data
 
     @classmethod
