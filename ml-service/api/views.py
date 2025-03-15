@@ -18,7 +18,7 @@ from config import VISUALIZATIONS_DIR, XMLS_DIR, TEMP_DIR, PROCESSED_DIR, OUTPUT
 
 logger = None
 
-CHAT_SERVICE_URL = os.getenv("CHAT_SERVICE_URL", "http://127.0.0.1:8081")
+CHAT_SERVICE_URL = os.getenv("CHAT_SERVICE_URL", "http://chat-service:8081")
 
 app = FastAPI(
     title='ML Service',
@@ -116,16 +116,27 @@ async def make_feedback(
         # Конвертация в MIDI
         await logger.info(f"Starting MIDI conversion: {processed_path}")
         pitcher = BasicPitcher()
+        await logger.info(f"bp inited: {pitcher}")
+
         submitted_midi_data = pitcher.invoke(str(processed_path))
+        await logger.info(f"subnitted data: {submitted_midi_data}")
+
+
         orig_midi_data = pretty_midi.PrettyMIDI(str(orig_midi_path))
+        await logger.info(f"orig midi data: {orig_midi_data}")
 
         sheet_gen = SheetGenerator(
             fractions=[0.125, 0.25, 0.5, 1, 2, 4],
             pause_fractions=[0.125, 0.25, 0.5, 1, 2, 4],
             default_path=XMLS_DIR)
+        await logger.info(f"sheet_gen: {sheet_gen}")
 
         original_stream = sheet_gen.invoke(orig_midi_data)
+        await logger.info(f"orig stream: {original_stream}")
+
         notes, tempo = sheet_gen.get_notes_from_midi(submitted_midi_data)
+        await logger.info(f"notes: {notes}")
+
         # print(notes, tempo)
         filename = f"comparison_{timestamp}.xml"
         vis_bath = XMLS_DIR / filename
@@ -137,7 +148,10 @@ async def make_feedback(
             viz_path=vis_bath,
             time_signature=(4, 4)
         )
+        await logger.info(f"submitter: {submitter}")
+
         compared_data_res = submitter.make_viz_new_algo()
+        await logger.info(f"coMPARED DATA: {compared_data_res}")
 
         submit_data = FeedbackRequest(
             result=[

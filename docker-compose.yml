@@ -9,16 +9,22 @@ services:
       - TZ=UTC
     volumes:
       - ./chat-service/logs:/app/logs
+    networks:
+      - network
   ml-service:
     build: ./ml-service
     container_name: ml-service
     ports:
-      - "127.0.0.1:8080:8080"
+      - "8080:8080"
     restart: unless-stopped
     environment:
       - TZ=UTC
     volumes:
       - ./ml-service/logs:/app/logs
+      - ./ml-service/temp:/app/data/temp/processed
+      - ./ml-service/input:/app/data/temp/input
+    networks:
+      - network
   frontend:
     build:
       context: ./frontend
@@ -36,3 +42,4 @@ services:
       - network
 networks:
  network:
+   driver: bridge

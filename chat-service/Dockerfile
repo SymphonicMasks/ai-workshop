@@ -13,4 +13,4 @@ COPY . .
 
 # RUN chmod +x entrypoint.sh
 
-CMD python -m uvicorn api:app --port 8081
+CMD python -m uvicorn api:app --host 0.0.0.0 --port 8081

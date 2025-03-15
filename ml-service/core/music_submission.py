@@ -10,15 +10,6 @@ from music21 import environment
 from config import XMLS_DIR
 
 
-import platform
-if platform.system() == 'Windows':
-    lilypond_path = r"D:\lilypond-2.24.4\bin\lilypond.exe"
-else:
-    lilypond_path = '/usr/bin/lilypond'
-
-environment.UserSettings()['lilypondPath'] = lilypond_path
-
-
 class SubmissionProcessor:
     """
     This class is used to process the user's submission and create a visualization of the user's submission compared to

@@ -10,7 +10,7 @@ function Sheets({data, errors, content}) {
 
     const [index, setIndex] = useState();
 
-    const error = Number.isInteger(index)  ? errors.wrong_parts[index] : undefined;
+    const error = Number.isInteger(index)  ? errors[index] : undefined;
 
 
     const toNextError = () => {
@@ -39,7 +39,7 @@ function Sheets({data, errors, content}) {
         cursorModel.addEventListener(
             'change',
             (e) => {
-                const part = errors.wrong_parts[e.index].tact_index
+                const part = errors[e.index]?.tact_index
                 setIndex(e.index)
                 const rect = score.getMeasures()[part].rect();
                 cursorComponent.update(rect);

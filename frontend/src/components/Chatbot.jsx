@@ -26,20 +26,12 @@ function Chatbot() {
       body: formData
     })
         .then(data =>data.json())
-        .then((data)=>{
-          if(data.detail){
-            throw new Error(data.detail);
-          }
-
-          return fetch(`http://127.0.0.1:8081/visualization/${data.filename}`)
-        })
-        .then(data => data.json())
-        .then(({summary, wrong_parts}) => {
+        .then(({summary, wrong_parts, xml}) => {
           setMessages(draft => {
             const index = draft.length - 1;
             draft[index] = {
               ...draft[index],
-              isError: true,
+              isError: false,
               loading: false,
               content: summary,
               errors: wrong_parts,
