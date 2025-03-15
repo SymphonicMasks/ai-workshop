@@ -9,7 +9,7 @@ function ChatMessages({ messages, isLoading }) {
 
   return (
     <div ref={scrollContentRef} className='grow space-y-4'>
-      {messages.map(({ role, content, url, loading, isError, xml }, idx) => (
+      {messages.map(({ role, content, url, loading, isError, xml, errors}, idx) => (
         <div key={idx} className={`flex items-start gap-4 py-4 px-3 rounded-xl ${role === 'user' ? 'bg-primary-blue/10' : ''}`}>
           {role === 'user' && (
             <img
@@ -22,7 +22,7 @@ function ChatMessages({ messages, isLoading }) {
             {!isError && <div className='markdown-container'>
               {(loading && !content) ? <Spinner />
                 : (role === 'assistant')
-                  ? <Sheets data={xml}/>
+                  ? <Sheets data={xml} errors={errors} content={content}/>
                   : <audio style={{width: '100%'}} src={url} controls={true} controlsList={"nodownload"}/>
               }
             </div>}

@@ -1,9 +1,8 @@
 import {useEffect, useRef, useState} from "react";
 import * as vexml from '@stringsync/vexml';
 import directionIcon from "../assets/images/next-icon.svg"
-import {errors} from './mock'
 
-function Sheets({data}) {
+function Sheets({data, errors, content}) {
     const ref = useRef(null)
 
     const [score, setScore] = useState(null);

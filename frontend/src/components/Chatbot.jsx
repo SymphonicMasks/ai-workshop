@@ -34,6 +34,20 @@ function Chatbot() {
           return fetch(`http://127.0.0.1:8081/visualization/${data.filename}`)
         })
         .then(data => data.json())
+        .then(({summary, wrong_parts}) => {
+          setMessages(draft => {
+            const index = draft.length - 1;
+            draft[index] = {
+              ...draft[index],
+              isError: true,
+              loading: false,
+              content: summary,
+              errors: wrong_parts,
+              xml
+            };
+          });
+
+        })
         .catch(e => {
            setMessages(draft => {
             const index = draft.length - 1;
@@ -41,7 +55,7 @@ function Chatbot() {
               ...draft[index],
               isError: true,
               loading: false,
-              content: e.message
+              content: e.message,
             };
           });
          })
