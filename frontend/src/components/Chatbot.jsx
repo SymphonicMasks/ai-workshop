@@ -14,49 +14,75 @@ function Chatbot() {
 
     setMessages(draft => [...draft,
       { role: 'user', record: record, url: URL.createObjectURL(record) },
-      { role: 'assistant', content: '', xml: '', errors: [], loading: true }
+      { role: 'assistant', content: '', xml: '', errors: [], loading: true, isError: false }
     ]);
 
-    try {
-      // 1. Отправляем аудио на обработку
-      const formData = new FormData();
-      formData.append('audio', record, 'recording.wav');
 
-      const feedbackRes = await fetch('http://127.0.0.1:8080/feedback', {
-        method: 'POST',
-        body: formData
-      });
+    const formData = new FormData();
+    formData.append('audio', record, 'recording.wav');
 
-      if (!feedbackRes.ok) throw new Error('Feedback request failed');
-      const { filename } = await feedbackRes.json();
+   fetch('http://127.0.0.1:8080/feedback', {
+      method: 'POST',
+      body: formData
+    })
+        .then(data =>data.json())
+        .then((data)=>{
+          if(data.detail){
+            throw new Error(data.detail);
+          }
 
-      // 2. Получаем сгенерированный XML
-      const vizRes = await fetch(`http://127.0.0.1:8081/visualization/${filename}`);
-      if (!vizRes.ok) throw new Error('Visualization request failed');
-      const xmlData = await vizRes.text();
-
-      // 3. Обновляем состояние с полученными данными
-      setMessages(draft => {
-        const index = draft.length - 1;
-        draft[index] = {
-          ...draft[index],
-          content: 'Анализ вашего исполнения',
-          xml: xmlData,
-          loading: false
-        };
-      });
-
-    } catch (err) {
-      setMessages(draft => {
-        const index = draft.length - 1;
-        draft[index] = {
-          ...draft[index],
-          error: true,
-          loading: false,
-          content: 'Ошибка при обработке аудио'
-        };
-      });
-    }
+          return fetch(`http://127.0.0.1:8081/visualization/${data.filename}`)
+        })
+        .then(data => data.json())
+        .catch(e => {
+           setMessages(draft => {
+            const index = draft.length - 1;
+            draft[index] = {
+              ...draft[index],
+              isError: true,
+              loading: false,
+              content: e.message
+            };
+          });
+         })
+    // try {
+    //   // 1. Отправляем аудио на обработку
+    //
+    //   const feedbackRes = await fetch('http://127.0.0.1:8080/feedback', {
+    //     method: 'POST',
+    //     body: formData
+    //   });
+    //
+    //   if (!feedbackRes.ok) throw new Error('Feedback request failed');
+    //   const { filename } = await feedbackRes.json();
+    //
+    //   // 2. Получаем сгенерированный XML
+    //   const vizRes = await fetch(`http://127.0.0.1:8081/visualization/${filename}`);
+    //   if (!vizRes.ok) throw new Error('Visualization request failed');
+    //   const xmlData = await vizRes.text();
+    //
+    //   // 3. Обновляем состояние с полученными данными
+    //   setMessages(draft => {
+    //     const index = draft.length - 1;
+    //     draft[index] = {
+    //       ...draft[index],
+    //       content: 'Анализ вашего исполнения',
+    //       xml: xmlData,
+    //       loading: false
+    //     };
+    //   });
+    //
+    // } catch (err) {
+    //   setMessages(draft => {
+    //     const index = draft.length - 1;
+    //     draft[index] = {
+    //       ...draft[index],
+    //       error: true,
+    //       loading: false,
+    //       content: 'Ошибка при обработке аудио'
+    //     };
+    //   });
+    // }
   }
 
   return (
